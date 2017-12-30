@@ -1,0 +1,3 @@
+Django
+flake8
+djangorestframework
