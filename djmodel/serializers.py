@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('sap_id', 'name', 'bio', 'created',
-                  'disk_utilization', 'group', 'profile')
+                  'disk_utilization', 'group')
 
 
 '''
@@ -147,21 +147,11 @@ class UserDiskUtilizationSerializer(serializers.ModelSerializer):
         fields = ('disk_utilization')
 
 
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('sap_id', 'name', 'password', 'bio', 'created',
-                  'disk_utilization', 'group')
-
-
-
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('category', 'year', 'division', 'group_id',
                   'total_disk_available')
-
 
 
 class FileGetInfoSerializer(serializers.ModelSerializer):
