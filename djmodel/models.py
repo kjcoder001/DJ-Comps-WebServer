@@ -1,12 +1,36 @@
 from django.db import models
-
+from django.conf import settings
+import uuid
+from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator
 # Create your models here.
+# from djmodel.managers import UserManager
 from pygments.lexers import get_all_lexers
 from pygments.styles import get_all_styles
-
+# from djmodel import constants
+from vote.models import VoteModel
 LEXERS = [item for item in get_all_lexers() if item[1]]
 LANGUAGE_CHOICES = sorted([(item[1][0], item[0]) for item in LEXERS])
 STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
+
+
+'''class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.sap_id
+'''
+
+
+class ResetPasswordCode(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    code = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+
+    class Meta:
+        default_related_name = 'reset_password_codes'
+
+    def __str__(self):
+        return f'{self.user.sap_id} - {self.code}'
 
 
 class Group(models.Model):
@@ -26,16 +50,34 @@ class User(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     bio = models.TextField()
     name = models.CharField(max_length=100)
-    password = models.CharField(max_length=100, default="", null=False)
-    sap_id = models.BigIntegerField(primary_key=True)
+    # password = models.CharField(_('password'),max_length=50, default="", null=False)
+    sap_id = models.BigIntegerField(primary_key=True,
+                                    validators=[MaxValueValidator(99999999999),
+                                                MinValueValidator(10000000000)])
     disk_utilization = models.FloatField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    '''
+    objects = UserManager()
+
+    USERNAME_FIELD = 'sap_id'
 
     class Meta:
         ordering = ['created', ]
 
+    def save(self, *args, **kwargs):
+        if not self.password:
+            self.password = str(uuid.uuid4()).replace('-', '')
+        super(User, self).save(*args, **kwargs)
 
-class File(models.Model):
+    def __str__(self):
+        return self.sap_id
+
+    def get_name(self):
+        return self.name
+'''
+
+
+class File(VoteModel, models.Model):
     time_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
     type1 = models.CharField(max_length=100)
@@ -43,11 +85,12 @@ class File(models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     size = models.IntegerField()
     no_of_downloads = models.IntegerField()
-    no_of_stars = models.IntegerField()
-    file_data = models.BinaryField()
+    # no_of_stars = models.IntegerField(choices=constants.VOTE_VALUE_CHOICES)
+    file_data = models.FileField(upload_to=None, max_length=100)
+    description = models.TextField(default='')
 
     class Meta:
-        ordering = ['size']
+        ordering = ['size', 'time_added']
 
 
 class File_Permission(models.Model):
