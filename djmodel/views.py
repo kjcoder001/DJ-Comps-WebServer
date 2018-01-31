@@ -339,11 +339,9 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 
 
-
 class File_PermissionViewSet(viewsets.ModelViewSet):
     queryset = File_Permission.objects.all()
     serializer_class = FilePermissionSerializer
-
 
 
 class StarFileView(APIView):
