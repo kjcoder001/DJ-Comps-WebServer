@@ -1,3 +1,4 @@
+
 from djmodel.models import Group, User, File, File_Permission, Stars  # , Profile
 from djmodel.serializers import UserSerializer, GroupSerializer  # , FileSerializer
 from djmodel.serializers import FilePermissionSerializer, StarsUpVoteSerializer
@@ -338,9 +339,11 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 
 
+
 class File_PermissionViewSet(viewsets.ModelViewSet):
     queryset = File_Permission.objects.all()
     serializer_class = FilePermissionSerializer
+
 
 
 class StarFileView(APIView):

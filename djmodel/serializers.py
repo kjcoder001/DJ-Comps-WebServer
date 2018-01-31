@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from djmodel.models import Group, User, File, File_Permission, Stars
+
 # from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -146,11 +147,21 @@ class UserDiskUtilizationSerializer(serializers.ModelSerializer):
         fields = ('disk_utilization')
 
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('sap_id', 'name', 'password', 'bio', 'created',
+                  'disk_utilization', 'group')
+
+
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('category', 'year', 'division', 'group_id',
                   'total_disk_available')
+
 
 
 class FileGetInfoSerializer(serializers.ModelSerializer):
@@ -168,11 +179,13 @@ class FileOrderingSerializer(serializers.ModelSerializer):
 
 
 """
+
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = ('size', 'time_added', 'name', 'file_id',
                   'type1', 'submitted_by',
+
                   'no_of_downloads', 'no_of_stars', 'file_data'
                   'description')
 """
@@ -182,6 +195,7 @@ class FiledownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = ('file_data')
+
 
 
 class FilePermissionSerializer(serializers.ModelSerializer):
