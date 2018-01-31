@@ -187,7 +187,6 @@ class FiledownloadSerializer(serializers.ModelSerializer):
         fields = ('file_data')
 
 
-
 class FilePermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = File_Permission
