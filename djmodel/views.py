@@ -226,11 +226,9 @@ class FileGetAllView(APIView):
             if sort_by == 'recent':
                 file = File.objects.order_by('time_added')[start_idx:end_idx]
                 return Response(FileOrderingSerializer(file).data)
-            '''if sort_by == 'popularity':
-                stars = File.objects.all()
-                list1 = []
-                list1.append(stars.votes.count())
-                list1.sort()'''
+            if sort_by == 'popularity':
+                stars = File.objects.order_by('no_of_stars')[start_idx:end_idx]
+                return Response(FileOrderingSerializer(stars).data)
         if sort_order == 'descending':
             if sort_by == 'size':
                 file = File.objects.order_by('-size')[start_idx:end_idx]
@@ -238,6 +236,9 @@ class FileGetAllView(APIView):
             if sort_by == 'recent':
                 file = File.objects.order_by('-time_added')[start_idx:end_idx]
                 return Response(FileOrderingSerializer(file).data)
+            if sort_by == 'popularity':
+                stars = File.objects.order_by('-no_of_stars')[start_idx:end_idx]
+                return Response(FileOrderingSerializer(stars).data)
 
 
 class FileGetByUserView(APIView):
@@ -254,11 +255,10 @@ class FileGetByUserView(APIView):
             if sort_by == 'recent':
                 file = File.objects.get(submitted_by=user).order_by('time_added')[start_idx:end_idx]
                 return Response(FileOrderingSerializer(file).data)
-            '''if sort_by == 'popularity':
-                stars = File.objects.all()
-                list1 = []
-                list1.append(stars.votes.count())
-                list1.sort()'''
+            if sort_by == 'popularity':
+                stars = File.objects.get(submitted_by=user).order_by('no_of_stars')[start_idx:
+                                                                                    end_idx]
+                return Response(FileOrderingSerializer(stars).data)
         if sort_order == 'descending':
             if sort_by == 'size':
                 file = File.objects.get(submitted_by=user).order_by('-size')[start_idx:end_idx]
@@ -267,6 +267,10 @@ class FileGetByUserView(APIView):
                 file = File.objects.get(submitted_by=user).order_by('-time_added')[start_idx:
                                                                                    end_idx]
                 return Response(FileOrderingSerializer(file).data)
+            if sort_by == 'popularity':
+                stars = File.objects.get(submitted_by=user).order_by('-no_of_stars')[start_idx:
+                                                                                     end_idx]
+                return Response(FileOrderingSerializer(stars).data)
 
 
 class FileGetByNameView(APIView):
@@ -282,11 +286,9 @@ class FileGetByNameView(APIView):
             if sort_by == 'recent':
                 file = File.objects.get(name=file_name).order_by('time_added')[start_idx:end_idx]
                 return Response(FileOrderingSerializer(file).data)
-            '''if sort_by == 'popularity':
-                stars = File.objects.all()
-                list1 = []
-                list1.append(stars.votes.count())
-                list1.sort()'''
+            if sort_by == 'popularity':
+                stars = File.objects.get(name=file_name).order_by('no_of_stars')[start_idx:end_idx]
+                return Response(FileOrderingSerializer(stars).data)
         if sort_order == 'descending':
             if sort_by == 'size':
                 file = File.objects.get(name=file_name).order_by('-size')[start_idx:end_idx]
@@ -295,6 +297,9 @@ class FileGetByNameView(APIView):
                 file = File.objects.get(name=file_name).order_by('-time_added')[start_idx:
                                                                                 end_idx]
                 return Response(FileOrderingSerializer(file).data)
+            if sort_by == 'popularity':
+                stars = File.objects.get(name=file_name).order_by('-no_of_stars')[start_idx:end_idx]
+                return Response(FileOrderingSerializer(stars).data)
 
 
 class FileGetInfoView(APIView):
@@ -345,26 +350,26 @@ class File_PermissionViewSet(viewsets.ModelViewSet):
 
 class StarFileView(APIView):
     @staticmethod
-    def get(request, file_id, user_id):
+    def get(request, file_id):
         '''
         Star a file
         '''
-        user = get_object_or_404(User, pk=user_id)
         files = get_object_or_404(File, pk=file_id)
-        files.votes.up(user)
+        files.no_of_stars += 1
+        files.save()
         star = Stars.objects.all(file=files)
         return Response(StarsUpVoteSerializer(star).data)
 
 
 class UnStarFileView(APIView):
     @staticmethod
-    def get(request, file_id, user_id):
+    def get(request, file_id):
         '''
         Unstar a file
         '''
-        user = get_object_or_404(User, pk=user_id)
         files = get_object_or_404(File, pk=file_id)
-        files.votes.delete(user)
+        files.no_of_stars -= 1
+        files.save()
         star = Stars.objects.all(file=files)
         return Response(StarsUpVoteSerializer(star).data)
 

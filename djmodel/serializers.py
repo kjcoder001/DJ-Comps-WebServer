@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('sap_id', 'name', 'bio', 'created',
-                  'disk_utilization', 'group', 'profile')
+                  'disk_utilization', 'group')
 
 
 '''
@@ -190,10 +190,12 @@ class FilePermissionSerializer(serializers.ModelSerializer):
         fields = ('permission_id', 'shared_with', 'file')
 
 
+'''
 class StarsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stars
         fields = ('star_id', 'starred_by', 'file')
+'''
 
 
 class StarsUpVoteSerializer(serializers.ModelSerializer):

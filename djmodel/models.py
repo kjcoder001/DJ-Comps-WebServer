@@ -5,13 +5,8 @@ from django.core.validators import MinValueValidator
 from django.core.validators import MaxValueValidator
 # Create your models here.
 # from djmodel.managers import UserManager
-from pygments.lexers import get_all_lexers
-from pygments.styles import get_all_styles
 # from djmodel import constants
 from vote.models import VoteModel
-LEXERS = [item for item in get_all_lexers() if item[1]]
-LANGUAGE_CHOICES = sorted([(item[1][0], item[0]) for item in LEXERS])
-STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
 
 
 '''class Profile(models.Model):
@@ -85,7 +80,7 @@ class File(VoteModel, models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     size = models.IntegerField()
     no_of_downloads = models.IntegerField()
-    # no_of_stars = models.IntegerField(choices=constants.VOTE_VALUE_CHOICES)
+    no_of_stars = models.IntegerField()
     file_data = models.FileField(upload_to=None, max_length=100)
     description = models.TextField(default='')
 
