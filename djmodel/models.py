@@ -1,4 +1,5 @@
 from django.db import models
+
 from django.conf import settings
 import uuid
 from django.core.validators import MinValueValidator
@@ -7,6 +8,14 @@ from django.core.validators import MaxValueValidator
 # from djmodel.managers import UserManager
 # from djmodel import constants
 from vote.models import VoteModel
+<<<<<<< HEAD
+=======
+
+
+LEXERS = [item for item in get_all_lexers() if item[1]]
+LANGUAGE_CHOICES = sorted([(item[1][0], item[0]) for item in LEXERS])
+STYLE_CHOICES = sorted((item, item) for item in get_all_styles())
+>>>>>>> 2d6dc77005a767ffdc8eb44d37ff8f15187eefb4
 
 
 '''class Profile(models.Model):
@@ -45,6 +54,7 @@ class User(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     bio = models.TextField()
     name = models.CharField(max_length=100)
+
     # password = models.CharField(_('password'),max_length=50, default="", null=False)
     sap_id = models.BigIntegerField(primary_key=True,
                                     validators=[MaxValueValidator(99999999999),
@@ -56,8 +66,15 @@ class User(models.Model):
 
     USERNAME_FIELD = 'sap_id'
 
+    password = models.CharField(max_length=100, default="", null=False)
+    sap_id = models.BigIntegerField(primary_key=True)
+    disk_utilization = models.FloatField()
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+
     class Meta:
         ordering = ['created', ]
+
 
     def save(self, *args, **kwargs):
         if not self.password:
@@ -80,7 +97,12 @@ class File(VoteModel, models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     size = models.IntegerField()
     no_of_downloads = models.IntegerField()
+<<<<<<< HEAD
     no_of_stars = models.IntegerField()
+=======
+
+    # no_of_stars = models.IntegerField(choices=constants.VOTE_VALUE_CHOICES)
+>>>>>>> 2d6dc77005a767ffdc8eb44d37ff8f15187eefb4
     file_data = models.FileField(upload_to=None, max_length=100)
     description = models.TextField(default='')
 

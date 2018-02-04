@@ -1,3 +1,8 @@
 Django
 flake8
 djangorestframework
+<<<<<<< HEAD
+=======
+pygments
+django-vote
+>>>>>>> 2d6dc77005a767ffdc8eb44d37ff8f15187eefb4

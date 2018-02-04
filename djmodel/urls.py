@@ -30,5 +30,4 @@ urlpatterns = [
     url(r'^star/star-file$', views.StarFileView.as_view()),
     url(r'^star/unstar-file$', views.UnStarFileView.as_view()),
     url(r'^file/upload/(?P<filename>[^/]+)$', views.FileUploadView.as_view()),
-
 ]

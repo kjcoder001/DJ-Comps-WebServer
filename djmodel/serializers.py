@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from djmodel.models import Group, User, File, File_Permission, Stars
+
 # from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -168,11 +169,13 @@ class FileOrderingSerializer(serializers.ModelSerializer):
 
 
 """
+
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = ('size', 'time_added', 'name', 'file_id',
                   'type1', 'submitted_by',
+
                   'no_of_downloads', 'no_of_stars', 'file_data'
                   'description')
 """
