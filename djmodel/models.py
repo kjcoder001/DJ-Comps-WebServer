@@ -89,7 +89,7 @@ class File(VoteModel, models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     size = models.IntegerField()
     no_of_downloads = models.IntegerField()
-    no_of_stars = models.IntegerField()
+    no_of_stars = models.IntegerField(default=0)
     file_data = models.FileField(upload_to=None, max_length=100)
     description = models.TextField(default='')
 
