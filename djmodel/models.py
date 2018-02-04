@@ -7,7 +7,7 @@ from django.core.validators import MaxValueValidator
 # Create your models here.
 # from djmodel.managers import UserManager
 # from djmodel import constants
-from vote.models import VoteModel
+# from vote.models import VoteModel
 
 
 '''class Profile(models.Model):
@@ -81,7 +81,8 @@ class User(models.Model):
 '''
 
 
-class File(VoteModel, models.Model):
+# class File(VoteModel, models.Model):
+class File(models.Model):
     time_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
     type1 = models.CharField(max_length=100)
