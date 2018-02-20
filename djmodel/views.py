@@ -8,7 +8,7 @@ from djmodel.serializers import UserByNameSerializer, UserDiskUtilizationSeriali
 from djmodel.serializers import FiledownloadSerializer, FileOrderingSerializer
 from djmodel.serializers import FileGetInfoSerializer
 # from djmodel.serializers import StarsSerializer
-from django.http import HttpResponse
+# from django.http import HttpResponse
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions
@@ -17,7 +17,8 @@ from rest_framework.views import APIView  # , ListView
 # from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.parsers import FileUploadParser
-from rest_framework.generics import CreateAPIView, GenericAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView
+# ListAPIView
 
 
 '''
