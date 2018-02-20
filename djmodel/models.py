@@ -32,7 +32,9 @@ class ResetPasswordCode(models.Model):
 class Group(models.Model):
     division = models.CharField(max_length=1)
     year = models.IntegerField()
-    group_id = models.BigIntegerField(primary_key=True)
+    group_id = models.BigIntegerField(primary_key=True,
+                                      validators=[MaxValueValidator(0),
+                                                  MinValueValidator(9999)])
     total_disk_available = models.FloatField()
     category = (("S", "Student"), ("T", "Teacher"), )
     category = models.CharField(max_length=1, choices=category, default="S",

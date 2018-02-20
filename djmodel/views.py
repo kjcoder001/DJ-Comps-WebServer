@@ -8,6 +8,7 @@ from djmodel.serializers import UserByNameSerializer, UserDiskUtilizationSeriali
 from djmodel.serializers import FiledownloadSerializer, FileOrderingSerializer
 from djmodel.serializers import FileGetInfoSerializer
 # from djmodel.serializers import StarsSerializer
+from django.http import HttpResponse
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions
@@ -16,7 +17,7 @@ from rest_framework.views import APIView  # , ListView
 # from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.parsers import FileUploadParser
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, ListAPIView
 
 
 '''
@@ -182,22 +183,34 @@ class UserByGroupView(APIView):
         get all users belonging to group
         """
         # get_data = request.GET.get(['disk_utilization'], ['group'])
-        group1 = get_object_or_404(Group, pk=group)
-        users = group1.user_set.all()
-        return Response(UserByGroupSerializer(users).data)
+        # group1 = get_object_or_404(Group, pk=group)
+        # users = group1.user_set.all()
+        user1 = User.objects.filter(group=group)
+        # return Response(UserByGroupSerializer(users).data)
+        if not user1:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(UserByGroupSerializer(user1, many=True).data)
 
 
 class UserByNameView(APIView):
 
     @staticmethod
-    def get(request, name1):
+    def get(request, name):
         """
         Get all users with same name
         """
         # get_data = request.GET.get(['disk_utilization'], ['group'])
-        user1 = User.objects.get(name=name1)
-        users = user1.user_set.all()
-        return Response(UserByNameSerializer(users).data)
+
+        user1 = User.objects.filter(name=name)
+        user = list(user1)
+        if not user1:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        # user = user1.user_set.all()
+        # users = get_object_or_404(User, name=name)
+        else:
+            return Response(UserByNameSerializer(user, many=True).data)
+        # return Response()
 
 
 class UserDiskUtilizationView(APIView):
