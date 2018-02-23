@@ -92,11 +92,11 @@ class File(models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     no_of_downloads = models.IntegerField(default=0)
     no_of_stars = models.IntegerField(default=0)
-    file_data = models.FileField(upload_to='djmodel/media/', max_length=100)
+    file_data = models.FileField(upload_to='', max_length=100)
     description = models.TextField(default='')
 
-    class Meta:
-        ordering = ['time_added']
+    # class Meta:
+    #     ordering = ['time_added']
 
 
 class File_Permission(models.Model):

@@ -157,7 +157,7 @@ class GroupSerializer(serializers.ModelSerializer):
 class FileGetInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('size', 'time_added', 'name', 'file_id',
+        fields = ('time_added', 'name', 'file_id',
                   'type1', 'submitted_by',
                   'no_of_downloads', 'no_of_stars', 'description')
 
@@ -165,7 +165,7 @@ class FileGetInfoSerializer(serializers.ModelSerializer):
 class FileOrderingSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('name', 'file_id', 'type1',)
+        fields = ('name', 'file_id', 'type1')
 
 
 """
@@ -184,7 +184,7 @@ class FileSerializer(serializers.ModelSerializer):
 class FiledownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('file_data')
+        fields = ('file_data',)
 
 
 class FilePermissionSerializer(serializers.ModelSerializer):
@@ -204,7 +204,7 @@ class StarsSerializer(serializers.ModelSerializer):
 class StarsUpVoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stars
-        fields = ('star_id')
+        fields = ('star_id', )
 
 
 '''class ProfileSerializer(serializers.ModelSerializer):
