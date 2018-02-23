@@ -90,14 +90,13 @@ class File(models.Model):
     type1 = models.CharField(max_length=100)
     file_id = models.BigIntegerField(primary_key=True)
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    size = models.IntegerField()
-    no_of_downloads = models.IntegerField()
+    no_of_downloads = models.IntegerField(default=0)
     no_of_stars = models.IntegerField(default=0)
-    file_data = models.FileField(upload_to=None, max_length=100)
+    file_data = models.FileField(upload_to='djmodel/media/', max_length=100)
     description = models.TextField(default='')
 
     class Meta:
-        ordering = ['size', 'time_added']
+        ordering = ['time_added']
 
 
 class File_Permission(models.Model):

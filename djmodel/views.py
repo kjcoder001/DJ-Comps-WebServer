@@ -21,26 +21,6 @@ from rest_framework.generics import CreateAPIView, GenericAPIView
 # ListAPIView
 
 
-'''
-class LoginView(APIView):
-    authentication_classes = ()
-    permission_classes = ()
-
-    @staticmethod
-    def post(request):
-        """
-        Get user data and API token
-        """
-
-        user = get_object_or_404(User, sap_id=request.data.get('sap_id'))
-        user = authenticate(username=user.sap_id, password=request.data.get('password'))
-        if user:
-            serializer = UserSerializerLogin(user)
-            return Response(serializer.data)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-'''
-
-
 class UserLoginAPIView(GenericAPIView):
     authentication_classes = ()
     permission_classes = ()
@@ -60,22 +40,6 @@ class UserLoginAPIView(GenericAPIView):
                 data=serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-
-'''
-class LogoutView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    @staticmethod
-    def get(request):
-        """
-        Remove API token
-        """
-
-        token = get_object_or_404(Token, key=request.auth)
-        token.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-'''
 
 
 class UserLogoutAPIView(APIView):
@@ -117,24 +81,6 @@ class UserView(APIView):
         # get_data = request.GET.get(['disk_utilization'], ['group'])
         users = User.objects.all()
         return Response(UserSerializer(users, many=True).data)
-
-
-'''
-    @staticmethod
-    def post(request):
-        """
-        Create user
-        """
-
-        serializer = UserSerializerCreate(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(serializer.validated_data['password'])
-            user.save()
-            Profile(user=user).save()
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-'''
 
 
 # users/{sap_id}
@@ -183,9 +129,6 @@ class UserByGroupView(APIView):
         """
         get all users belonging to group
         """
-        # get_data = request.GET.get(['disk_utilization'], ['group'])
-        # group1 = get_object_or_404(Group, pk=group)
-        # users = group1.user_set.all()
         user1 = User.objects.filter(group=group)
         # return Response(UserByGroupSerializer(users).data)
         if not user1:
@@ -201,14 +144,11 @@ class UserByNameView(APIView):
         """
         Get all users with same name
         """
-        # get_data = request.GET.get(['disk_utilization'], ['group'])
 
         user1 = User.objects.filter(name=name)
         user = list(user1)
         if not user1:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        # user = user1.user_set.all()
-        # users = get_object_or_404(User, name=name)
         else:
             return Response(UserByNameSerializer(user, many=True).data)
         # return Response()
@@ -222,8 +162,6 @@ class UserDiskUtilizationView(APIView):
         """
         Get disk_utilization of authenticated user
         """
-        # get_data = request.GET.get(['disk_utilization'], ['group'])
-
         users = User.objects.all()
         return Response(UserDiskUtilizationSerializer(users).data)
 
@@ -398,4 +336,6 @@ class FileUploadView(APIView):
         '''
         file_obj = request.FILES['file']
         # do some stuff with uploaded file
+        extension = name.split(".").lower()[-1]
+        print(extension)
         return Response(file_obj.file_id, status.HTTP_201_CREATED)
