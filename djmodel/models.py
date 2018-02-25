@@ -32,7 +32,9 @@ class ResetPasswordCode(models.Model):
 class Group(models.Model):
     division = models.CharField(max_length=1)
     year = models.IntegerField()
-    group_id = models.BigIntegerField(primary_key=True)
+    group_id = models.BigIntegerField(primary_key=True,
+                                      validators=[MaxValueValidator(0),
+                                                  MinValueValidator(9999)])
     total_disk_available = models.FloatField()
     category = (("S", "Student"), ("T", "Teacher"), )
     category = models.CharField(max_length=1, choices=category, default="S",
@@ -88,14 +90,13 @@ class File(models.Model):
     type1 = models.CharField(max_length=100)
     file_id = models.BigIntegerField(primary_key=True)
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    size = models.IntegerField()
-    no_of_downloads = models.IntegerField()
+    no_of_downloads = models.IntegerField(default=0)
     no_of_stars = models.IntegerField(default=0)
-    file_data = models.FileField(upload_to=None, max_length=100)
+    file_data = models.FileField(upload_to='', max_length=100)
     description = models.TextField(default='')
 
-    class Meta:
-        ordering = ['size', 'time_added']
+    # class Meta:
+    #     ordering = ['time_added']
 
 
 class File_Permission(models.Model):

@@ -6,8 +6,9 @@ from djmodel.serializers import UserRegistrationSerializer, UserSerializerLogin
 from djmodel.serializers import UserSerializerUpdate, UserByGroupSerializer, TokenSerializer
 from djmodel.serializers import UserByNameSerializer, UserDiskUtilizationSerializer
 from djmodel.serializers import FiledownloadSerializer, FileOrderingSerializer
-from djmodel.serializers import FileGetInfoSerializer
+from djmodel.serializers import FileGetInfoSerializer, FileSerializer
 # from djmodel.serializers import StarsSerializer
+# from django.http import HttpResponse
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions
@@ -15,28 +16,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView  # , ListView
 # from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from rest_framework.parsers import FileUploadParser
+# from rest_framework.parsers import FileUploadParser,
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.generics import CreateAPIView, GenericAPIView
-
-
-'''
-class LoginView(APIView):
-    authentication_classes = ()
-    permission_classes = ()
-
-    @staticmethod
-    def post(request):
-        """
-        Get user data and API token
-        """
-
-        user = get_object_or_404(User, sap_id=request.data.get('sap_id'))
-        user = authenticate(username=user.sap_id, password=request.data.get('password'))
-        if user:
-            serializer = UserSerializerLogin(user)
-            return Response(serializer.data)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-'''
+# ListAPIView
+# from random import randint
 
 
 class UserLoginAPIView(GenericAPIView):
@@ -58,22 +42,6 @@ class UserLoginAPIView(GenericAPIView):
                 data=serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-
-'''
-class LogoutView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    @staticmethod
-    def get(request):
-        """
-        Remove API token
-        """
-
-        token = get_object_or_404(Token, key=request.auth)
-        token.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-'''
 
 
 class UserLogoutAPIView(APIView):
@@ -115,24 +83,6 @@ class UserView(APIView):
         # get_data = request.GET.get(['disk_utilization'], ['group'])
         users = User.objects.all()
         return Response(UserSerializer(users, many=True).data)
-
-
-'''
-    @staticmethod
-    def post(request):
-        """
-        Create user
-        """
-
-        serializer = UserSerializerCreate(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(serializer.validated_data['password'])
-            user.save()
-            Profile(user=user).save()
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-'''
 
 
 # users/{sap_id}
@@ -181,23 +131,29 @@ class UserByGroupView(APIView):
         """
         get all users belonging to group
         """
-        # get_data = request.GET.get(['disk_utilization'], ['group'])
-        group1 = get_object_or_404(Group, pk=group)
-        users = group1.user_set.all()
-        return Response(UserByGroupSerializer(users).data)
+        user1 = User.objects.filter(group=group)
+        # return Response(UserByGroupSerializer(users).data)
+        if not user1:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(UserByGroupSerializer(user1, many=True).data)
 
 
 class UserByNameView(APIView):
 
     @staticmethod
-    def get(request, name1):
+    def get(request, name):
         """
         Get all users with same name
         """
-        # get_data = request.GET.get(['disk_utilization'], ['group'])
-        user1 = User.objects.get(name=name1)
-        users = user1.user_set.all()
-        return Response(UserByNameSerializer(users).data)
+
+        user1 = User.objects.filter(name=name)
+        user = list(user1)
+        if not user1:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(UserByNameSerializer(user, many=True).data)
+        # return Response()
 
 
 class UserDiskUtilizationView(APIView):
@@ -208,8 +164,6 @@ class UserDiskUtilizationView(APIView):
         """
         Get disk_utilization of authenticated user
         """
-        # get_data = request.GET.get(['disk_utilization'], ['group'])
-
         users = User.objects.all()
         return Response(UserDiskUtilizationSerializer(users).data)
 
@@ -221,86 +175,89 @@ class FileGetAllView(APIView):
         Get all files from start_idx to end_idx
         '''
         if sort_order == 'ascending':
-            if sort_by == 'size':
-                file = File.objects.order_by('size')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+            # if sort_by == 'size':
+            #     file = File.objects.order_by('size')[start_idx:end_idx]
+            #     return Response(FileOrderingSerializer(file, many=True).data)
             if sort_by == 'recent':
                 file = File.objects.order_by('time_added')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+                return Response(FileOrderingSerializer(file, many=True).data)
             if sort_by == 'popularity':
                 stars = File.objects.order_by('no_of_stars')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(stars).data)
+                return Response(FileOrderingSerializer(stars, many=True).data)
         if sort_order == 'descending':
-            if sort_by == 'size':
-                file = File.objects.order_by('-size')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+            # if sort_by == 'size':
+            #     file = File.objects.order_by('-size')[start_idx:end_idx]
+            #     return Response(FileOrderingSerializer(file, many=True).data)
             if sort_by == 'recent':
                 file = File.objects.order_by('-time_added')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+                return Response(FileOrderingSerializer(file, many=True).data)
             if sort_by == 'popularity':
                 stars = File.objects.order_by('-no_of_stars')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(stars).data)
+                return Response(FileOrderingSerializer(stars, many=True).data)
 
 
 class FileGetByUserView(APIView):
     @staticmethod
-    def get(request, start_idx, end_idx, sap_id, sort_by, sort_order):
+    def get(request, sap_id, start_idx, end_idx, sort_by, sort_order):
         '''
         Get all files of a particular user
         '''
-        user = User.get_object_or_404(User, pk=sap_id)
+        user = get_object_or_404(User, pk=sap_id)
         if sort_order == 'ascending':
-            if sort_by == 'size':
-                file = File.objects.get(submitted_by=user).order_by('size')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+            # if sort_by == 'size':
+            #    file = File.objects.get(submitted_by=user).order_by('size')[start_idx:end_idx]
+            #     return Response(FileOrderingSerializer(file).data)
             if sort_by == 'recent':
-                file = File.objects.get(submitted_by=user).order_by('time_added')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
-            if sort_by == 'popularity':
-                stars = File.objects.get(submitted_by=user).order_by('no_of_stars')[start_idx:
-                                                                                    end_idx]
-                return Response(FileOrderingSerializer(stars).data)
-        if sort_order == 'descending':
-            if sort_by == 'size':
-                file = File.objects.get(submitted_by=user).order_by('-size')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
-            if sort_by == 'recent':
-                file = File.objects.get(submitted_by=user).order_by('-time_added')[start_idx:
-                                                                                   end_idx]
-                return Response(FileOrderingSerializer(file).data)
-            if sort_by == 'popularity':
-                stars = File.objects.get(submitted_by=user).order_by('-no_of_stars')[start_idx:
+                file = File.objects.filter(submitted_by=user).order_by('time_added')[start_idx - 1:
                                                                                      end_idx]
-                return Response(FileOrderingSerializer(stars).data)
+                return Response(FileOrderingSerializer(file, many=True).data)
+            if sort_by == 'popularity':
+                stars = File.objects.filter(submitted_by=user).order_by('no_of_stars')[(start_idx -
+                                                                                       1):end_idx]
+                return Response(FileOrderingSerializer(stars, many=True).data)
+        if sort_order == 'descending':
+            # if sort_by == 'size':
+            #    file = File.objects.get(submitted_by=user).order_by('-size')[start_idx:end_idx]
+            #    return Response(FileOrderingSerializer(file).data)
+            if sort_by == 'recent':
+                file = File.objects.filter(submitted_by=user).order_by('-time_added')[start_idx - 1:
+                                                                                      end_idx]
+                return Response(FileOrderingSerializer(file, many=True).data)
+            if sort_by == 'popularity':
+                stars = File.objects.filter(submitted_by=user).order_by('-no_of_stars')[(start_idx -
+                                                                                        1):end_idx]
+                return Response(FileOrderingSerializer(stars, many=True).data)
 
 
 class FileGetByNameView(APIView):
     @staticmethod
-    def get(request, start_idx, end_idx, file_name, sort_by, sort_order):
+    def get(request, file_name, start_idx, end_idx, sort_by, sort_order):
         '''
         Get a file by name
         '''
         if sort_order == 'ascending':
-            if sort_by == 'size':
-                file = File.objects.get(name=file_name).order_by('size')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+            # if sort_by == 'size':
+            #     file = File.objects.get(name=file_name).order_by('size')[start_idx:end_idx]
+            #     return Response(FileOrderingSerializer(file).data)
             if sort_by == 'recent':
-                file = File.objects.get(name=file_name).order_by('time_added')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+                file = File.objects.filter(name=file_name).order_by('time_added')[start_idx:end_idx]
+                return Response(FileOrderingSerializer(file, many=True).data)
             if sort_by == 'popularity':
-                stars = File.objects.get(name=file_name).order_by('no_of_stars')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(stars).data)
+                stars = File.objects.filter(name=file_name).order_by('no_of_stars')[start_idx:
+                                                                                    end_idx]
+                return Response(FileOrderingSerializer(stars, many=True).data)
         if sort_order == 'descending':
-            if sort_by == 'size':
-                file = File.objects.get(name=file_name).order_by('-size')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(file).data)
+            # if sort_by == 'size':
+            #     file = File.objects.get(name=file_name).order_by('-size')[start_idx:end_idx]
+            #     return Response(FileOrderingSerializer(file).data)
             if sort_by == 'recent':
-                file = File.objects.get(name=file_name).order_by('-time_added')[start_idx:
-                                                                                end_idx]
-                return Response(FileOrderingSerializer(file).data)
+                file = File.objects.filter(name=file_name).order_by('-time_added')[start_idx:
+                                                                                   end_idx]
+                return Response(FileOrderingSerializer(file, many=True).data)
             if sort_by == 'popularity':
-                stars = File.objects.get(name=file_name).order_by('-no_of_stars')[start_idx:end_idx]
-                return Response(FileOrderingSerializer(stars).data)
+                stars = File.objects.filter(name=file_name).order_by('-no_of_stars')[start_idx:
+                                                                                     end_idx]
+                return Response(FileOrderingSerializer(stars, many=True).data)
 
 
 class FileGetInfoView(APIView):
@@ -311,8 +268,12 @@ class FileGetInfoView(APIView):
         Get info of a particular file
         """
         # get_data = request.GET.get(['disk_utilization'], ['group'])
-        file1 = File.objects.get(file_id=file_id)
-        return Response(FileGetInfoSerializer(file1).data)
+        try:
+            File.objects.get(file_id=file_id)
+        except File.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(FileGetInfoSerializer(File.objects.get(file_id=file_id)).data)
 
 
 class FileDownloadView(APIView):
@@ -358,8 +319,12 @@ class StarFileView(APIView):
         files = get_object_or_404(File, pk=file_id)
         files.no_of_stars += 1
         files.save()
-        star = Stars.objects.all(file=files)
-        return Response(StarsUpVoteSerializer(star).data)
+        star = Stars.objects.filter(file=files)
+        # star.star_id = int(str(file_id) + str(randint(0, 10000)))
+        # for i in star:
+        #     star.save(['star_id'])
+        # print(star.star_id)
+        return Response(StarsUpVoteSerializer(star, many=True).data)
 
 
 class UnStarFileView(APIView):
@@ -371,17 +336,48 @@ class UnStarFileView(APIView):
         files = get_object_or_404(File, pk=file_id)
         files.no_of_stars -= 1
         files.save()
-        star = Stars.objects.all(file=files)
-        return Response(StarsUpVoteSerializer(star).data)
+        star = Stars.objects.filter(file=files)
+        # star.star_id = str(file_id) + str(randint(0, 10000))
+        # for i in star:
+        #     star.save(['star_id'])
+        # print(star)
+        return Response(StarsUpVoteSerializer(star, many=True).data)
+
+
+'''
+class FileUploadView(APIView):
+
+    parser_classes = (FileUploadParser,)
+
+    def put(self, request, name, description, format=None):
+
+        file_obj = request.FILES['file']
+        # do some stuff with uploaded file
+        # extension = file_data.split(".").lower()[-1]
+        # print(extension)
+        return Response(file_obj.file_id, status.HTTP_201_CREATED)
+
+    def model_form_upload(request):
+        if request.method == 'POST':
+            form = DocumentForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                return redirect('home')
+        else:
+            form = DocumentForm()
+        return render(request, 'core/model_form_upload.html', {
+            'form': form
+        })
+'''
 
 
 class FileUploadView(APIView):
-    parser_classes = (FileUploadParser,)
+    parser_classes = (MultiPartParser, FormParser)
 
-    def put(self, request, name, description, file_data, format=None):
-        '''
-        Upload file
-        '''
-        file_obj = request.FILES['file']
-        # do some stuff with uploaded file
-        return Response(file_obj.file_id, status.HTTP_201_CREATED)
+    def post(self, request, *args, **kwargs):
+        file_serializer = FileSerializer(data=request.data)
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
