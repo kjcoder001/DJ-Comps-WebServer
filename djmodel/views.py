@@ -6,7 +6,7 @@ from djmodel.serializers import UserRegistrationSerializer, UserSerializerLogin
 from djmodel.serializers import UserSerializerUpdate, UserByGroupSerializer, TokenSerializer
 from djmodel.serializers import UserByNameSerializer, UserDiskUtilizationSerializer
 from djmodel.serializers import FiledownloadSerializer, FileOrderingSerializer
-from djmodel.serializers import FileGetInfoSerializer
+from djmodel.serializers import FileGetInfoSerializer, FileSerializer
 # from djmodel.serializers import StarsSerializer
 # from django.http import HttpResponse
 from rest_framework import viewsets
@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView  # , ListView
 # from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.generics import CreateAPIView, GenericAPIView
 # ListAPIView
 from random import randint
@@ -319,10 +319,10 @@ class StarFileView(APIView):
         files.no_of_stars += 1
         files.save()
         star = Stars.objects.filter(file=files)
-        star.star_id = int(str(file_id) + str(randint(0, 10000)))
-        for i in star:
-            star.save(['star_id'])
-        print(star.star_id)
+        # star.star_id = int(str(file_id) + str(randint(0, 10000)))
+        # for i in star:
+        #     star.save(['star_id'])
+        # print(star.star_id)
         return Response(StarsUpVoteSerializer(star, many=True).data)
 
 
@@ -336,22 +336,47 @@ class UnStarFileView(APIView):
         files.no_of_stars -= 1
         files.save()
         star = Stars.objects.filter(file=files)
-        star.star_id = str(file_id) + str(randint(0, 10000))
-        for i in star:
-            star.save(['star_id'])
-        print(star)
+        # star.star_id = str(file_id) + str(randint(0, 10000))
+        # for i in star:
+        #     star.save(['star_id'])
+        # print(star)
         return Response(StarsUpVoteSerializer(star, many=True).data)
 
 
+'''
 class FileUploadView(APIView):
+
     parser_classes = (FileUploadParser,)
 
-    def put(self, request, name, description, file_data, format=None):
-        '''
-        Upload file
-        '''
+    def put(self, request, name, description, format=None):
+
         file_obj = request.FILES['file']
         # do some stuff with uploaded file
-        extension = file_data.split(".").lower()[-1]
-        print(extension)
+        # extension = file_data.split(".").lower()[-1]
+        # print(extension)
         return Response(file_obj.file_id, status.HTTP_201_CREATED)
+
+    def model_form_upload(request):
+        if request.method == 'POST':
+            form = DocumentForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                return redirect('home')
+        else:
+            form = DocumentForm()
+        return render(request, 'core/model_form_upload.html', {
+            'form': form
+        })
+'''
+
+
+class FileUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        file_serializer = FileSerializer(data=request.data)
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

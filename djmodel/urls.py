@@ -33,6 +33,6 @@ urlpatterns = [
     path('file/delete/fileid=<int:file_id>/', views.FileDeleteView.as_view()),
     path('star/star-file/<int:file_id>/', views.StarFileView.as_view()),
     path('star/unstar-file/<int:file_id>/', views.UnStarFileView.as_view()),
-    # url(r'^file/upload/(?P<filename>[^/]+)$', views.FileUploadView.as_view()),
-    path('file/upload/<slug:name>/<slug:description>/<slug:file_data>/', views.FileUploadView.as_view()),
+    url(r'^file/upload/$', views.FileUploadView.as_view()),
+    # path('file/upload/<slug:name>/<slug:description>/<slug:file_data>/', views.FileUploadView.as_view()),
 ]

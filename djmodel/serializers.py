@@ -168,17 +168,12 @@ class FileOrderingSerializer(serializers.ModelSerializer):
         fields = ('name', 'file_id', 'type1')
 
 
-"""
-
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('size', 'time_added', 'name', 'file_id',
-                  'type1', 'submitted_by',
-
-                  'no_of_downloads', 'no_of_stars', 'file_data'
+        fields = ('time_added', 'name', 'file_id',
+                  'type1', 'submitted_by', 'no_of_downloads', 'no_of_stars', 'file_data'
                   'description')
-"""
 
 
 class FiledownloadSerializer(serializers.ModelSerializer):
