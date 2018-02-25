@@ -16,10 +16,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView  # , ListView
 # from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+# from rest_framework.parsers import FileUploadParser,
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.generics import CreateAPIView, GenericAPIView
 # ListAPIView
-from random import randint
+# from random import randint
 
 
 class UserLoginAPIView(GenericAPIView):
