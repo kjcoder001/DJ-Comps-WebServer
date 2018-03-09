@@ -55,6 +55,11 @@ ROOT_URLCONF = 'dj_comps.urls'
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.FileUploadParser',
+    ),
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     )
 }
 TEMPLATES = [

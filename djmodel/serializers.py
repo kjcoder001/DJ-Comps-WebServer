@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from djmodel.models import Group, User, File, File_Permission, Stars
-
+from djmodel.models import Group, User, File, File_Permission, Stars, Tp
+from django.contrib.auth.hashers import make_password, check_password
 # from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -49,23 +49,46 @@ class UserSerializerCreate(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
+    # password = serializers.CharField(write_only=True)
+    # confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
         fields = ('sap_id', 'name', 'bio', 'created',
-                  'disk_utilization', 'group', 'profile', 'password', 'confirm_password')
-
-    def create(self, validated_data):
-        del validated_data["confirm_password"]
-        return super(UserRegistrationSerializer, self).create(validated_data)
+                  'disk_utilization', 'group', 'password', 'confirm_password')
+        # extra_kwargs = {'password': {'write_only': True},
+        #                'confirm_password': {'write_only': True}}
 
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('confirm_password'):
             raise serializers.ValidationError("Those passwords don't match.")
         return attrs
 
+    def create(self, validated_data):
+        del validated_data['confirm_password']
+        user = User.objects.create(
+            sap_id=validated_data['sap_id'],
+            name=validated_data['name'],
+            bio=validated_data['bio'],
+            disk_utilization=validated_data['disk_utilization'],
+            group=validated_data['group'],
+            password=make_password(validated_data['password'])
+            # password=validated_data['password'],
+            # confirm_password=validated_data['confirm_password'],
+        )
+        return user
+
+
+'''
+    def create(self, validated_data):
+        del validated_data["confirm_password"]
+        return super(UserRegistrationSerializer, self).create(validated_data)
+
+   def validate(self, attrs):
+        if attrs.get('password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError("Those passwords don't match.")
+        return attrs
+'''
 
 '''
 class UserSerializerLogin(UserSerializer):
@@ -88,27 +111,45 @@ class UserSerializerLogin(UserSerializer):
 
 
 class UserSerializerLogin(serializers.Serializer):
+    sap_id = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
 
     class Meta:
         model = User
+        fields = ('sap_id', 'password')
 
     default_error_messages = {
         'inactive_account': _('User account is disabled.'),
+        'Useriddoesnotexist': _('User ID does not exist'),
         'invalid_credentials': _('Unable to login with provided credentials.')
     }
 
-    def __init__(self, *args, **kwargs):
-        super(UserSerializerLogin, self).__init__(*args, **kwargs)
-        self.user = None
+    # def __init__(self, *args, **kwargs):
+    #     super(UserSerializerLogin, self).__init__(*args, **kwargs)
+    #    self.user = None
 
     def validate(self, attrs):
-        self.user = authenticate(username=attrs.get("sap_id"), password=attrs.get('password'))
+        try:
+            obj = User.objects.get(sap_id=attrs.get('sap_id'))
+            if obj:
+                # if(obj.password == attrs.get('password')):
+                if check_password(attrs.get('password'), obj.password):
+                    return attrs
+                else:
+                    raise serializers.ValidationError(self.error_messages['invalid_credentials'])
+        except:
+            raise serializers.ValidationError(self.error_messages['Useriddoesnotexist'])
+
+
+'''
+        self.user = authenticate(username=attrs.get('sap_id'), password=attrs.get('password'))
         if self.user:
             if not self.user.is_active:
                 raise serializers.ValidationError(self.error_messages['inactive_account'])
             return attrs
         else:
             raise serializers.ValidationError(self.error_messages['invalid_credentials'])
+'''
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -157,22 +198,21 @@ class GroupSerializer(serializers.ModelSerializer):
 class FileGetInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('time_added', 'name', 'file_id',
-                  'type1', 'submitted_by',
+        fields = ('time_added', 'name', 'file_id', 'submitted_by',
                   'no_of_downloads', 'no_of_stars', 'description')
 
 
 class FileOrderingSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('name', 'file_id', 'type1')
+        fields = ('name', 'file_id')
 
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = ('time_added', 'name', 'file_id',
-                  'type1', 'submitted_by', 'no_of_downloads', 'no_of_stars', 'file_data'
+                  'submitted_by', 'no_of_downloads', 'no_of_stars', 'file_data',
                   'description')
 
 
@@ -208,3 +248,25 @@ class StarsUpVoteSerializer(serializers.ModelSerializer):
         model = Profile
         fields = '__all__'
 '''
+
+
+class NouseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tp
+        fields = '__all__'
+
+
+class NouseUserSerializer(serializers.ModelSerializer):
+    sap_id = serializers.IntegerField(default=0)
+
+    class Meta:
+        model = Tp
+        fields = ('start_idx', 'end_idx', 'sort_by', 'sort_order', 'sap_id',)
+
+
+class NouseNameSerializer(serializers.ModelSerializer):
+    file_name = serializers.CharField(default=None)
+
+    class Meta:
+        model = Tp
+        fields = ('start_idx', 'end_idx', 'sort_by', 'sort_order', 'file_name',)
