@@ -161,6 +161,17 @@ class UserDetail(APIView):
         return Response(UserSerializer(user).data)
 
 
+class UserDeleteView(APIView):
+    parser_classes = (JSONParser,)
+    authentication_classes = ()
+    permission_classes = ()
+
+    def post(self, request):
+        user = get_object_or_404(User, pk=request.data['sap_id'])
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 '''
     @staticmethod
     def get(request, sap_id):

@@ -22,6 +22,8 @@ urlpatterns = [
     url(r'^users/sap_id$', views.UserDetail.as_view()),
     # url(r'^users/(?P<name>[A-Za-z]+)$', views.UserByNameView.as_view()),
     url(r'^users/name$', views.UserByNameView.as_view()),
+    url(r'^users/delete$', views.UserDeleteView.as_view()),
+
 
     # url(r'^users/(?=.{1,4}$)(?P<group>[\d]+)$', views.UserByGroupView.as_view()),
     url(r'^users/group$', views.UserByGroupView.as_view()),
