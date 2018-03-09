@@ -3,7 +3,9 @@ from djmodel.models import Group, User, File, File_Permission, Stars  # , Profil
 from djmodel.serializers import UserSerializer, GroupSerializer  # , FileSerializer
 from djmodel.serializers import FilePermissionSerializer, StarsUpVoteSerializer
 from djmodel.serializers import UserRegistrationSerializer, UserSerializerLogin
-from djmodel.serializers import UserSerializerUpdate, UserByGroupSerializer, TokenSerializer
+# from djmodel.serializers import UserSerializerUpdate, UserByGroupSerializer, TokenSerializer
+from djmodel.serializers import UserByGroupSerializer
+
 from djmodel.serializers import UserByNameSerializer, UserDiskUtilizationSerializer
 from djmodel.serializers import FiledownloadSerializer, FileOrderingSerializer
 from djmodel.serializers import FileGetInfoSerializer, FileSerializer, NouseSerializer
@@ -20,13 +22,14 @@ from rest_framework.authtoken.models import Token
 # from rest_framework.parsers import FileUploadParser,
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.generics import CreateAPIView, GenericAPIView
-from rest_framework.authentication import TokenAuthentication
-from django.contrib.auth import (
+# from rest_framework.authentication import TokenAuthentication
+'''from django.contrib.auth import (
     authenticate,
     get_user_model,
     login,
     logout,
 )
+'''
 # ListAPIView
 # from random import randint
 
@@ -168,10 +171,10 @@ class UserDetail(APIView):
         user = get_object_or_404(User, pk=sap_id)
         return Response(UserSerializer(user).data)
 '''
-        # sap_id = request.data
-        # user = User.objects.get(sap_id=sap_id)
-        # user.delete()
-        # return Response(status=status.HTTP_204_NO_CONTENT)
+# sap_id = request.data
+# user = User.objects.get(sap_id=sap_id)
+# user.delete()
+# return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 '''

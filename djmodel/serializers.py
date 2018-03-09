@@ -3,7 +3,7 @@ from djmodel.models import Group, User, File, File_Permission, Stars, Tp
 from django.contrib.auth.hashers import make_password, check_password
 # from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+# from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -137,7 +137,7 @@ class UserSerializerLogin(serializers.Serializer):
                     return attrs
                 else:
                     raise serializers.ValidationError(self.error_messages['invalid_credentials'])
-        except:
+        except Exception:
             raise serializers.ValidationError(self.error_messages['Useriddoesnotexist'])
 
 
