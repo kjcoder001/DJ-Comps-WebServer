@@ -93,7 +93,7 @@ class File(models.Model):
     time_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
     # type1 = models.CharField(max_length=100)
-    file_id = models.BigIntegerField(primary_key=True)
+    file_id = models.AutoField(primary_key=True)
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     no_of_downloads = models.IntegerField(default=0)
     no_of_stars = models.IntegerField(default=0)

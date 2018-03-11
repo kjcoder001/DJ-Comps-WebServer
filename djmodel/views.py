@@ -33,6 +33,8 @@ from rest_framework.generics import CreateAPIView, GenericAPIView
 # ListAPIView
 # from random import randint
 
+import ast
+
 
 class UserLoginAPIView(GenericAPIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -43,8 +45,8 @@ class UserLoginAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            print('hi')
             return Response(
+                data=serializer.data,
                 status=status.HTTP_200_OK,
             )
         else:
@@ -148,7 +150,7 @@ class UserView(APIView):
 # users/{sap_id}
 class UserDetail(APIView):
     # authentication_classes = (TokenAuthentication)
-    parser_classes = (JSONParser,)
+    parser_classes = (JSONParser, FormParser)
     authentication_classes = ()
     permission_classes = ()
 
@@ -218,20 +220,24 @@ class UserDeleteView(APIView):
 
 
 class UserByGroupView(APIView):
-    parser_classes = (JSONParser,)
+    parser_classes = (JSONParser, FormParser)
     authentication_classes = ()
     permission_classes = ()
 
     def post(self, request):
+        print(request)
+        print(request.data)
         """
         get all users belonging to group
         """
-        user1 = User.objects.filter(group=request.data['group'])
+        groups_ids = ast.literal_eval(request.data['group'])
+        user = User.objects.filter(group__in=groups_ids)
+        print(user)
         # return Response(UserByGroupSerializer(users).data)
-        if not user1:
+        if not user:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(UserByGroupSerializer(user1, many=True).data)
+            return Response(UserByGroupSerializer(user, many=True).data)
 
 
 class UserByNameView(APIView):
@@ -310,11 +316,27 @@ class FileGetByUserView(APIView):
         '''
         Get all files of a particular user
         '''
-        start_idx = int(request.data['start_idx'])
-        end_idx = int(request.data['end_idx'])
+        if 'start_idx' in request.data:
+            start_idx = int(request.data['start_idx'])
+        else:
+            start_idx = 1
+
+        if 'end_idx' in request.data:
+            end_idx = int(request.data['end_idx'])
+        else:
+            end_idx = 10
+
+        if 'sort_by' in request.data:
+            sort_by = request.data['sort_by']
+        else:
+            sort_by = "recent"
+
+        if 'sort_order' in request.data:
+            sort_order = request.data['sort_order']
+        else:
+            sort_order = "descending"
+
         sap_id = int(request.data['sap_id'])
-        sort_by = request.data['sort_by']
-        sort_order = request.data['sort_order']
 
         user = get_object_or_404(User, pk=sap_id)
         if sort_order == 'ascending':

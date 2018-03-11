@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from djmodel.models import Group, User, File, File_Permission, Stars, Tp
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 # from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 # from django.contrib.auth import authenticate
@@ -110,13 +110,13 @@ class UserSerializerLogin(UserSerializer):
 '''
 
 
-class UserSerializerLogin(serializers.Serializer):
+class UserSerializerLogin(serializers.ModelSerializer):
     sap_id = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ('sap_id', 'password')
+        fields = ('sap_id', 'password', 'group_id')
 
     default_error_messages = {
         'inactive_account': _('User account is disabled.'),
@@ -129,15 +129,14 @@ class UserSerializerLogin(serializers.Serializer):
     #    self.user = None
 
     def validate(self, attrs):
-        try:
-            obj = User.objects.get(sap_id=attrs.get('sap_id'))
-            if obj:
-                # if(obj.password == attrs.get('password')):
-                if check_password(attrs.get('password'), obj.password):
-                    return attrs
-                else:
-                    raise serializers.ValidationError(self.error_messages['invalid_credentials'])
-        except Exception:
+        obj = User.objects.get(sap_id=attrs.get('sap_id'))
+        if obj:
+            # if(obj.password == attrs.get('password')):
+            if attrs.get('password') == obj.password:
+                return obj
+            else:
+                raise serializers.ValidationError(self.error_messages['invalid_credentials'])
+        else:
             raise serializers.ValidationError(self.error_messages['Useriddoesnotexist'])
 
 
@@ -171,7 +170,7 @@ class UserByGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('name', 'sap_id')
+        fields = ('name', 'sap_id', 'group', 'bio')
 
 
 class UserByNameSerializer(serializers.ModelSerializer):
