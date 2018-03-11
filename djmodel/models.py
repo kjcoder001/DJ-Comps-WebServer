@@ -2,6 +2,7 @@ from django.db import models
 
 from django.conf import settings
 import uuid
+import os
 from django.core.validators import MinValueValidator
 from django.core.validators import MaxValueValidator
 # Create your models here.
@@ -33,8 +34,8 @@ class Group(models.Model):
     division = models.CharField(max_length=1)
     year = models.IntegerField()
     group_id = models.BigIntegerField(primary_key=True,
-                                      validators=[MaxValueValidator(0),
-                                                  MinValueValidator(9999)])
+                                      validators=[MinValueValidator(0),
+                                                  MaxValueValidator(9999)])
     total_disk_available = models.FloatField()
     category = (("S", "Student"), ("T", "Teacher"), )
     category = models.CharField(max_length=1, choices=category, default="S",
@@ -55,7 +56,11 @@ class User(models.Model):
                                                 MinValueValidator(10000000000)])
     disk_utilization = models.FloatField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    '''
+    password = models.CharField(max_length=30, default='')
+    confirm_password = models.CharField(max_length=30, default='')
+
+
+'''
     objects = UserManager()
 
     USERNAME_FIELD = 'sap_id'
@@ -87,13 +92,17 @@ class User(models.Model):
 class File(models.Model):
     time_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
-    type1 = models.CharField(max_length=100)
+    # type1 = models.CharField(max_length=100)
     file_id = models.BigIntegerField(primary_key=True)
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
     no_of_downloads = models.IntegerField(default=0)
     no_of_stars = models.IntegerField(default=0)
-    file_data = models.FileField(upload_to='', max_length=100)
+    file_data = models.FileField(blank=False, null=False)
     description = models.TextField(default='')
+
+    def extension(self):
+        name, type1 = os.path.splitext(self.file_data.name)
+        return type1
 
     # class Meta:
     #     ordering = ['time_added']
@@ -109,3 +118,14 @@ class Stars(models.Model):
     star_id = models.BigIntegerField(primary_key=True)
     file = models.ForeignKey(File, on_delete=models.CASCADE)
     starred_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class Tp(models.Model):
+    start_idx = models.IntegerField(default=0)
+    end_idx = models.IntegerField(default=0)
+    category = (("ascending", "ascending"), ("descending", "descending"), )
+    sort_order = models.CharField(max_length=10, choices=category, default=None,
+                                  null=True)
+    category = (("recent", "recent"), ("popularity", "popularity"), )
+    sort_by = models.CharField(max_length=10, choices=category, default=None,
+                               null=True)
