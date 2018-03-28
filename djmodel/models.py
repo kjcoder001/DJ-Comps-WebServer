@@ -17,6 +17,7 @@ from django.core.validators import MaxValueValidator
         return self.user.sap_id
 '''
 
+
 class Group(models.Model):
     division = models.CharField(max_length=1)
     year = models.IntegerField()
@@ -33,12 +34,12 @@ class Group(models.Model):
 
 
 class Notification(models.Model):
-    group=models.ForeignKey(Group,on_delete=models.CASCADE,blank=True,null=True)
-    title=models.CharField(max_length=120,blank=True,null=True,default='')
-    body=models.CharField(max_length=120,blank=True,null=True,default='')
-    deadline=models.BooleanField(default=False)
-    deadline_subject=models.CharField(max_length=120,default='',blank=True,null=True)
-    deadline_topic=models.CharField(max_length=120,default='',blank=True,null=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
+    title = models.CharField(max_length=120, blank=True, null=True, default='')
+    body = models.CharField(max_length=120, blank=True, null=True, default='')
+    deadline = models.BooleanField(default=False)
+    deadline_subject = models.CharField(max_length=120, default='', blank=True, null=True)
+    deadline_topic = models.CharField(max_length=120, default='', blank=True, null=True)
 
 
 class ResetPasswordCode(models.Model):
@@ -52,11 +53,10 @@ class ResetPasswordCode(models.Model):
         return f'{self.user.sap_id} - {self.code}'
 
 
-
 class User(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     bio = models.TextField()
-    android_token=models.CharField(max_length=200)
+    android_token = models.CharField(max_length=200)
     name = models.CharField(max_length=100)
 
     # password = models.CharField(_('password'),max_length=50, default="", null=False)

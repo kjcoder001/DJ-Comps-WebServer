@@ -23,8 +23,8 @@ urlpatterns = [
     # url(r'^users/(?P<name>[A-Za-z]+)$', views.UserByNameView.as_view()),
     url(r'^users/name$', views.UserByNameView.as_view()),
     url(r'^users/delete$', views.UserDeleteView.as_view()),
-    url(r'^notifications/$',views.NotificationView.as_view()),
-    url(r'^list-notifications/$',views.ListNotification.as_view()),
+    url(r'^notifications/$', views.NotificationView.as_view()),
+    url(r'^list-notifications/$', views.ListNotification.as_view()),
     # url(r'^users/(?=.{1,4}$)(?P<group>[\d]+)$', views.UserByGroupView.as_view()),
     url(r'^users/group$', views.UserByGroupView.as_view()),
 
