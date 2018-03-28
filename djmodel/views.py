@@ -1,8 +1,8 @@
 
-from djmodel.models import Group, User, File, File_Permission, Stars  # , Profile
+from djmodel.models import Group, User, File, File_Permission, Stars,Notification  # , Profile
 from djmodel.serializers import UserSerializer, GroupSerializer  # , FileSerializer
 from djmodel.serializers import FilePermissionSerializer, StarsUpVoteSerializer
-from djmodel.serializers import UserRegistrationSerializer, UserSerializerLogin
+from djmodel.serializers import UserRegistrationSerializer, UserSerializerLogin,NotificationSerializer
 # from djmodel.serializers import UserSerializerUpdate, UserByGroupSerializer, TokenSerializer
 from djmodel.serializers import UserByGroupSerializer
 
@@ -21,7 +21,8 @@ from rest_framework.views import APIView  # , ListView
 from rest_framework.authtoken.models import Token
 # from rest_framework.parsers import FileUploadParser,
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView,ListAPIView
+from pyfcm import FCMNotification
 # from rest_framework.authentication import TokenAuthentication
 '''from django.contrib.auth import (
     authenticate,
@@ -30,10 +31,65 @@ from rest_framework.generics import CreateAPIView, GenericAPIView
     logout,
 )
 '''
+
 # ListAPIView
 # from random import randint
 
 import ast
+class NotificationView(GenericAPIView):
+    parser_classes=(MultiPartParser,FormParser)
+    serializer_class=NotificationSerializer
+    def post(self,request):
+        push_service = FCMNotification(api_key="AAAAnN1TIdw:APA91bGRfLfJJpxML0vtZ2SaQqyr9YHpCuHfbEMRv8NAj0zDK9mNMgUcJL8gEwG4sVVx9Aj0O6fpNfaOQSTHenVTuKxYhhioVNaIzPzVtej98gvq80arWd5M3MoaXiUl4kZSdW2miYuB")
+        serializer=self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            if serializer.data['deadline']==True:
+                message_title=serializer.data['deadline_subject']
+                message_body=serializer.data['deadline_topic']
+                #registration_id=serializer.data['android_token']
+                group_id=serializer.data['group']
+                group=Group.objects.filter(group_id=group_id)[0]
+                queryset=group.user_set.all()
+                registration_id=[]
+                for user in queryset:
+                    registration_id.append(user.android_token)
+
+                #registration_id="cvmeSxKINBY:APA91bH2U6x7QKsbsaQ40qz8oKyKaN0-7h4xvh2u1654qL4SvMQIMeFXqgADO2RRTJv0mNhwopPZODcPgBPdcwasorRoPBJxlPXboFxO6gCKcpbVmeaFYKElQJgqQMtrhv6CI7duI7qT"
+                result = push_service.notify_multiple_devices(registration_ids=registration_id, message_title=message_title, message_body=message_body)
+                print(result)
+            else:
+                message_title=serializer.data['title']
+                message_body=serializer.data['body']
+                group_id=serializer.data['group']
+                group=Group.objects.filter(group_id=group_id)[0]
+                queryset=group.user_set.all()
+                registration_id=[]
+                for user in queryset:
+                    registration_id.append(user.android_token)
+
+                #registration_id=serializer.data['android_token']
+                #registration_id="cvmeSxKINBY:APA91bH2U6x7QKsbsaQ40qz8oKyKaN0-7h4xvh2u1654qL4SvMQIMeFXqgADO2RRTJv0mNhwopPZODcPgBPdcwasorRoPBJxlPXboFxO6gCKcpbVmeaFYKElQJgqQMtrhv6CI7duI7qT"
+                result = push_service.notify_multiple_devices(registration_ids=registration_id, message_title=message_title, message_body=message_body)
+                print(result)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListNotification(ListAPIView):
+    '''Lists all the notifications'''
+    queryset=Notification.objects.all()
+    serializer_class=NotificationSerializer
+
+    def post(self,request):
+        serializer=self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class UserLoginAPIView(GenericAPIView):
@@ -45,6 +101,21 @@ class UserLoginAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            queryset=Notification.objects.all()
+            for notif in queryset:
+                if notif.deadline==True:
+                    message_title=notif.deadline_subject
+                    message_body=notif.deadline_topic
+                    registration_id=serializer.data['android_token']
+                    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
+                    print(result)
+                else:
+                    message_title=notif.title
+                    message_body=notif.body
+                    registration_id=serializer.data['android_token']
+                    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
+                    print(result)
+
             return Response(
                 data=serializer.data,
                 status=status.HTTP_200_OK,
@@ -537,7 +608,19 @@ class FileUploadView(APIView):
         file_serializer = FileSerializer(data=request.data)
         if file_serializer.is_valid():
             file_serializer.save()
-            # headers = self.get_success_headers(file_serializer.data)
+            push_service = FCMNotification(api_key="AAAAnN1TIdw:APA91bGRfLfJJpxML0vtZ2SaQqyr9YHpCuHfbEMRv8NAj0zDK9mNMgUcJL8gEwG4sVVx9Aj0O6fpNfaOQSTHenVTuKxYhhioVNaIzPzVtej98gvq80arWd5M3MoaXiUl4kZSdW2miYuB")
+            message_title='New File Upload'
+
+            user=User.objects.filter(sap_id=file_serializer.data['submitted_by'])[0]
+            message_body=str(user.name)+' uploaded '+file_serializer.data['name']
+            group=user.group
+            registration_ids=[]
+            queryset=group.user_set.all()
+            for student in queryset:
+                registration_ids.append(student.android_token)
+
+            result = push_service.notify_multiple_devices(registration_ids=registration_ids, message_title=message_title, message_body=message_body)
+            print(result)
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

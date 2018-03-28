@@ -1,5 +1,4 @@
 from django.db import models
-
 from django.conf import settings
 import uuid
 import os
@@ -18,18 +17,6 @@ from django.core.validators import MaxValueValidator
         return self.user.sap_id
 '''
 
-
-class ResetPasswordCode(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
-    code = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
-
-    class Meta:
-        default_related_name = 'reset_password_codes'
-
-    def __str__(self):
-        return f'{self.user.sap_id} - {self.code}'
-
-
 class Group(models.Model):
     division = models.CharField(max_length=1)
     year = models.IntegerField()
@@ -45,9 +32,31 @@ class Group(models.Model):
         ordering = ['category', 'year']
 
 
+class Notification(models.Model):
+    group=models.ForeignKey(Group,on_delete=models.CASCADE,blank=True,null=True)
+    title=models.CharField(max_length=120,blank=True,null=True,default='')
+    body=models.CharField(max_length=120,blank=True,null=True,default='')
+    deadline=models.BooleanField(default=False)
+    deadline_subject=models.CharField(max_length=120,default='',blank=True,null=True)
+    deadline_topic=models.CharField(max_length=120,default='',blank=True,null=True)
+
+
+class ResetPasswordCode(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    code = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+
+    class Meta:
+        default_related_name = 'reset_password_codes'
+
+    def __str__(self):
+        return f'{self.user.sap_id} - {self.code}'
+
+
+
 class User(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     bio = models.TextField()
+    android_token=models.CharField(max_length=200)
     name = models.CharField(max_length=100)
 
     # password = models.CharField(_('password'),max_length=50, default="", null=False)

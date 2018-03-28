@@ -1,11 +1,15 @@
 from rest_framework import serializers
-from djmodel.models import Group, User, File, File_Permission, Stars, Tp
+from djmodel.models import Group, User, File, File_Permission, Stars, Tp,Notification
 from django.contrib.auth.hashers import make_password
 # from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 # from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Notification
+        fields=('group','title','body','deadline','deadline_subject','deadline_topic',)
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -13,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('sap_id', 'name', 'bio', 'created',
+        fields = ('sap_id','name','bio', 'created','android_token',
                   'disk_utilization', 'group')
 
 
@@ -54,7 +58,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('sap_id', 'name', 'bio', 'created',
+        fields = ('sap_id', 'name', 'bio', 'created','android_token',
                   'disk_utilization', 'group', 'password', 'confirm_password')
         # extra_kwargs = {'password': {'write_only': True},
         #                'confirm_password': {'write_only': True}}
@@ -70,6 +74,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             sap_id=validated_data['sap_id'],
             name=validated_data['name'],
             bio=validated_data['bio'],
+            android_token=validated_data['android_token'],
             disk_utilization=validated_data['disk_utilization'],
             group=validated_data['group'],
             password=make_password(validated_data['password'])
